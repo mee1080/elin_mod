@@ -149,8 +149,8 @@ class Patch_DisplayInfo_GetHoverText2
                 text += $"{Environment.NewLine}{ability}".TagSize(14);
             }
 
-            Tactics tactics = chara.tactics;
-            text += $"{Environment.NewLine}{Lang.Get("tactics")}: {tactics.sourceChara.GetName()}({tactics.source.GetName()}) Range:{tactics.DestDist} MoveRate:{tactics.ChanceMove} MoveRate2:{tactics.ChanceSecondMove}".TagSize(14);
+            // Tactics tactics = chara.tactics;
+            // text += $"{Environment.NewLine}{Lang.Get("tactics")}: {tactics.sourceChara.GetName()}({tactics.source.GetName()}) Range:{tactics.DestDist} MoveRate:{tactics.ChanceMove} MoveRate2:{tactics.ChanceSecondMove}".TagSize(14);
         }
         __result = text + __result;
         Patch_DisplayInfo_Data.inGetHoverText2 = false;
