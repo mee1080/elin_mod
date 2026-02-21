@@ -35,15 +35,22 @@ class Patch_DisplayIngredients
                     Thing soySauce = ThingGen.Create("sauce_soy");
                     CraftUtil.MixIngredients(soySauce, [fish, seaweed], CraftUtil.MixType.General, 999);
                     Data.data["sauce_soy"][GetParams(soySauce)] = fish.Name;
+                    soySauce.Destroy();
+
                     Thing bonito = ThingGen.Create("bonito");
                     CraftUtil.MixIngredients(bonito, [fish], CraftUtil.MixType.General, 999);
                     Data.data["bonito"][GetParams(bonito)] = fish.Name;
+                    bonito.Destroy();
+
                     Thing kibble = ThingGen.Create("ration_basic");
                     CraftUtil.MixIngredients(kibble, [fish, bark], CraftUtil.MixType.General, 999);
                     Data.data["ration_basic"][GetParams(kibble)] = fish.Name;
+                    kibble.Destroy();
                 }
-            }
-            );
+                fish.Destroy();
+            });
+            seaweed.Destroy();
+            bark.Destroy();
         }
         if (!Data.data.ContainsKey(__instance.id)) return;
         // Data.data[__instance.id].Do(e => Plugin.Log(e.Key + ": " + e.Value));
