@@ -14,7 +14,7 @@ class Patch_TakeSharedItems_TryTakeSharedItems
         // Plugin.Log($"TryTakeSharedItems {__instance.Name}");
         // 所持(0)or最後に食べた日(index+1)
         Dictionary<string, int> minHistory = [];
-        for (int i = __instance._historyFood.Count - 1; i >= 0; i--)
+        for (int i = (__instance._historyFood?.Count ?? 0) - 1; i >= 0; i--)
         {
             foreach (string id in __instance._historyFood[i])
             {
@@ -24,7 +24,7 @@ class Patch_TakeSharedItems_TryTakeSharedItems
 
         int numFood = 2;
         int numJustCooked = 1;
-        __instance.things.ForEach(t =>
+        __instance.things?.ForEach(t =>
         {
             if (__instance.CanEat(t))
             {
@@ -46,7 +46,7 @@ class Patch_TakeSharedItems_TryTakeSharedItems
         foreach (Thing container in containers)
         {
             if (!container.IsSharedContainer) continue;
-            container.things.ForEach(t =>
+            container.things?.ForEach(t =>
             {
                 // 食べられないものは無視
                 if (!__instance.CanEat(t, shouldEat)) return;
