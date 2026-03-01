@@ -35,7 +35,7 @@ class Patch_BrainInfo_WriteNote
         int distance = row.aiParam.Length < 1 ? source.dist : row.aiParam[0];
         int chanceMove = row.aiParam.Length < 2 ? source.move : row.aiParam[1];
         int chanceSecondMove = row.aiParam.Length < 3 ? 100 : row.aiParam[2];
-        n.AddText(Common.L(distance, chanceMove, chanceSecondMove));
+        n.AddText("NoteText_enc", Common.L(distance, chanceMove, chanceSecondMove));
     }
 }
 
