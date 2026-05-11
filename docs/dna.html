@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Elin 遺伝子シミュレータ</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; line-height: 1.4; color: #333; background-color: #f0f2f5; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; }
+        h2 { font-size: 1.2em; margin-top: 25px; border-left: 5px solid #007bff; padding-left: 10px; }
+        .section { margin-bottom: 30px; padding: 15px; border: 1px solid #eee; border-radius: 6px; }
+        .form-row { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; }
+        .form-row label { flex: 0 0 120px; font-weight: bold; margin-bottom: 0; }
+        input[type="text"], input[type="number"] { padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+        .dynamic-list { margin-top: 10px; }
+        .dynamic-item { display: flex; gap: 10px; margin-bottom: 5px; align-items: center; }
+        .btn-add { background: #28a745; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-del { background: #dc3545; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-run { display: block; width: 100%; padding: 15px; font-size: 1.2em; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; }
+        .btn-run:hover { background: #0056b3; }
+        .btn-multi { background: #6f42c1; }
+        .btn-multi:hover { background: #59359a; }
+        .slider-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .slider-item { display: flex; flex-direction: column; }
+        .slider-item label { display: flex; justify-content: space-between; font-weight: normal; }
+        #result { margin-top: 25px; padding: 20px; border: 2px solid #007bff; background: #f8fbff; border-radius: 6px; }
+        .result-header { font-weight: bold; font-size: 1.3em; color: #007bff; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .result-content { font-family: monospace; line-height: 1.6; }
+        .result-line { border-bottom: 1px dashed #eee; padding: 2px 0; display: flex; justify-content: space-between; align-items: center; }
+        .freq-bar { background: #e9ecef; flex-grow: 1; margin: 0 15px; height: 1.2em; border-radius: 3px; overflow: hidden; position: relative; }
+        .freq-fill { background: #007bff; height: 100%; }
+        .freq-text { position: absolute; right: 5px; top: 0; font-size: 0.85em; color: #333; }
+        .target-result { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 20px; border-radius: 4px; font-weight: bold; }
+        .slime-only { display: none; background: #e2f3e2; padding: 10px; border-radius: 4px; margin-top: 10px; border: 1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Elin 遺伝子シミュレータ（仮）</h1>
+        
+        <div class="section">
+            <div class="form-row">
+                <label style="flex: 0 0 auto;"><input type="checkbox" id="superior" checked> <strong>優性遺伝子</strong></label>
+                <label style="flex: 0 0 auto; margin-left: 20px;"><input type="checkbox" id="predationMode"> <strong>捕食モード</strong></label>
+            </div>
+            
+            <div id="slimeOptions" class="slime-only">
+                <strong>捕食オプション:</strong>
+                <div class="form-row" style="margin-top:10px">
+                    <label>獲得済み部位数:</label>
+                    <input type="range" id="slimeSlotCount" min="0" max="10" value="0">
+                    <span id="val-slimeSlotCount">0</span>
+                </div>
+                <div class="form-row">
+                    <label style="width: auto;"><input type="checkbox" id="hasHand">手あり</label>
+                    <label style="width: auto; margin-left:20px;"><input type="checkbox" id="hasBody">胴あり</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>主能力 (上位3種)</h2>
+            <div id="attb-container">
+                <div class="form-row"><input type="text" class="attb-id" value="筋力" style="width:80px">: <input type="number" class="attb-val" value="50" style="width:60px"></div>
+                <div class="form-row"><input type="text" class="attb-id" value="耐久" style="width:80px">: <input type="number" class="attb-val" value="40" style="width:60px"></div>
+                <div class="form-row"><input type="text" class="attb-id" value="器用" style="width:80px">: <input type="number" class="attb-val" value="30" style="width:60px"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>スキル (上位6種)</h2>
+            <div id="skill-container">
+                <div class="form-row"><input type="text" class="skill-id" value="戦術" style="width:80px">: <input type="number" class="skill-val" value="50" style="width:60px"></div>
+                <div class="form-row"><input type="text" class="skill-id" value="格闘" style="width:80px">: <input type="number" class="skill-val" value="45" style="width:60px"></div>
+                <div class="form-row"><input type="text" class="skill-id" value="射撃" style="width:80px">: <input type="number" class="skill-val" value="40" style="width:60px"></div>
+                <div class="form-row"><input type="text" class="skill-id" value="自然治癒" style="width:80px">: <input type="number" class="skill-val" value="35" style="width:60px"></div>
+                <div class="form-row"><input type="text" class="skill-id" value="魔道具" style="width:80px">: <input type="number" class="skill-val" value="30" style="width:60px"></div>
+                <div class="form-row"><input type="text" class="skill-id" value="農業" style="width:80px">: <input type="number" class="skill-val" value="25" style="width:60px"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>フィート</h2>
+            <div id="feat-list" class="dynamic-list"></div>
+            <button class="btn-add" onclick="addItem('feat')">+ フィート追加</button>
+        </div>
+
+        <div class="section">
+            <h2>アビリティ</h2>
+            <div id="ability-list" class="dynamic-list"></div>
+            <button class="btn-add" onclick="addItem('ability')">+ アビリティ追加</button>
+        </div>
+
+        <div class="section">
+            <h2>部位</h2>
+            <div class="slider-group">
+                <div class="slider-item"><label>手: <span id="val-手">1</span></label><input type="range" class="body-slider" data-id="手" min="0" max="4" value="1"></div>
+                <div class="slider-item"><label>頭: <span id="val-頭">1</span></label><input type="range" class="body-slider" data-id="頭" min="0" max="4" value="1"></div>
+                <div class="slider-item"><label>胴: <span id="val-胴">1</span></label><input type="range" class="body-slider" data-id="胴" min="0" max="4" value="1"></div>
+                <div class="slider-item"><label>腕: <span id="val-腕">1</span></label><input type="range" class="body-slider" data-id="腕" min="0" max="4" value="1"></div>
+                <div class="slider-item"><label>足: <span id="val-足">1</span></label><input type="range" class="body-slider" data-id="足" min="0" max="4" value="1"></div>
+                <div class="slider-item"><label>首: <span id="val-首">1</span></label><input type="range" class="body-slider" data-id="首" min="0" max="4" value="1"></div>
+                <div class="slider-item"><label>指: <span id="val-指">1</span></label><input type="range" class="body-slider" data-id="指" min="0" max="4" value="1"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>シミュレーションオプション</h2>
+            <div class="form-row">
+                <label>試行回数:</label>
+                <input type="number" id="simCount" value="10000" min="1" max="100000" style="width:100px">
+            </div>
+            <div class="form-row">
+                <label>欲しい遺伝子:</label>
+                <input type="text" id="targetIds" placeholder="主能力1, スキル1, ..." style="flex-grow:1">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-run" id="runOnceBtn" style="margin-top:10px">1回のみ実行</button>
+                <button class="btn-run btn-multi" id="runMultiBtn" style="margin-top:10px">シミュレーション実行</button>
+            </div>
+        </div>
+
+        <div id="result" style="display:none;">
+            <div class="result-header" id="res-header"></div>
+            <div class="result-content" id="res-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const EClass = {
+            rnd: (n) => {
+                return Math.floor(Math.random() * n);
+            },
+            rndHalf: (n) => {
+                return Math.floor(Math.random() * Math.floor(n / 2)) + Math.floor(n / 2);
+            },
+            curve: (v, start, step, rate = 75) => {
+                if (v <= start) {
+                    return v;
+                }
+                let num = v;
+                for (let i = 0; i < 10; i++) {
+                    let num2 = start + i * step;
+                    if (num <= num2) {
+                        break;
+                    }
+                    num = num2 + Math.floor((num - num2) * rate / 100);
+                }
+                return Mathf.Clamp(num, -2147483648, 2147483647);
+            },
+            debug: {
+                enable: false
+            }
+        };
+
+        const Mathf = {
+            Clamp: (v, min, max) => Math.min(Math.max(v, min), max)
+        };
+
+        function GetRandomItem(list) {
+            return (list && list.length > 0) ? list[EClass.rnd(list.length)] : null;
+        }
+
+        function generate(superior, listAttb, listSkill, listFeat, listAbility, listBodySlot) {
+            const result = {
+                cost: 0,
+                vals: [],
+                bodyId: null
+            };
+
+            let body = 0;
+            let action = 0;
+            let feat = 0;
+            let maxSlot = 1;
+
+            const AddVal = (id, v, allowStack, funcCost, allowNegative) => {
+                if (v >= 0 || allowNegative) {
+                    let flag = false;
+                    let num = EClass.curve(v, 20, 10, 90);
+                    if (v < -100) {
+                        num = EClass.curve(Math.abs(v + 100), 20, 10, 90);
+                    }
+                    v = EClass.curve(v, 20, 10, 80);
+                    for (let k = 0; k < result.vals.length; k += 2) {
+                        if (result.vals[k] === id) {
+                            if (allowStack) {
+                                v = Math.floor(v / 2);
+                                num = Math.floor(num / 2);
+                                result.vals[k + 1] += v;
+                                console.log(result.vals[k + 1] + ": " + v + "/" + num);
+                                flag = true;
+                                break;
+                            }
+                            return;
+                        }
+                    }
+                    if (v !== 0) {
+                        if (!flag) {
+                            result.vals.push(id);
+                            result.vals.push(v);
+                        }
+                        result.cost += Math.max(0, funcCost(num));
+                    }
+                }
+            };
+
+            const AddAction = () => {
+                if (listAbility.length !== 0) {
+                    const a = GetRandomItem(listAbility);
+                    if (!(a.act.source.category !== "ability") && a.act.source.geneSlot >= 0) {
+                        AddVal(a.act.source.id, a.chance, false, (v) => 8 + Math.floor(a.act.source.cost[0] / 10) * 2, true);
+                        action++;
+                    }
+                }
+            };
+
+            const AddAttribute = () => {
+                const element = listAttb[EClass.rnd(3)];
+                if (element) {
+                    AddVal(element.id, EClass.rndHalf(Math.floor(element.ValueWithoutLink / 2)), true, (v) => Math.floor(v / 5) + 1, false);
+                }
+            };
+
+            const AddBody = () => {
+                if (body === 0) {
+                    let bodySlot = null;
+                    for (let j = 0; j < 100; j++) {
+                        const bodySlot2 = GetRandomItem(listBodySlot);
+                        if (bodySlot2 !== null && bodySlot2.elementId !== 40 && bodySlot2.elementId !== 44) {
+                            bodySlot = bodySlot2;
+                            break;
+                        }
+                    }
+                    if (bodySlot !== null) {
+                        AddVal(bodySlot.elementId, 1, false, (v) => 20, false);
+                        result.bodyId = bodySlot.elementId;
+                        body++;
+                    }
+                }
+            };
+
+            const AddFeat = () => {
+                if (listFeat.length !== 0) {
+                    feat++;
+                    const e = GetRandomItem(listFeat);
+                    if (e && (maxSlot <= 1 || e.source.geneSlot <= 1)) {
+                        if (e.source.geneSlot > maxSlot) {
+                            maxSlot = e.source.geneSlot;
+                        }
+                        AddVal(e.id, 1, false, (v) => e.source.cost[0] * 5, false);
+                    }
+                }
+            };
+
+            const AddSkill = () => {
+                const element2 = listSkill[Mathf.Clamp(EClass.rnd(6), 0, listSkill.length - 1)];
+                if (element2) {
+                    AddVal(element2.id, EClass.rndHalf(Math.floor(element2.ValueWithoutLink / 2)), true, (v) => Math.floor(v / 5) + 1, false);
+                }
+            };
+
+            const AddSpecial = () => {
+                if (EClass.rnd(3) === 0) {
+                    AddAction();
+                } else if (EClass.rnd(5) === 0) {
+                    AddBody();
+                } else if (listFeat.length > 0) {
+                    AddFeat();
+                } else if (EClass.rnd(2) === 0) {
+                    AddSkill();
+                } else {
+                    AddAttribute();
+                }
+            };
+
+            const AddRandom = (n) => {
+                for (let l = 0; l < n; l++) {
+                    if (EClass.debug.enable && EClass.rnd(2) === 0) {
+                        AddSpecial();
+                    } else if (EClass.rnd(2) === 0) {
+                        AddSkill();
+                    } else {
+                        AddAttribute();
+                    }
+                }
+            };
+
+            if (superior) {
+                AddRandom(EClass.rnd(EClass.rnd(4)) + 3);
+                if (EClass.rnd(3) === 0) {
+                    AddSpecial();
+                }
+                AddSpecial();
+            } else {
+                AddRandom(EClass.rnd(EClass.rnd(4)) + 1);
+                if (EClass.rnd(3) === 0 || result.vals.length === 0) {
+                    AddSpecial();
+                }
+            }
+
+            if (result.vals.length === 0) {
+                for (let i = 0; i < 10; i++) {
+                    if (EClass.rnd(4) === 0) {
+                        AddSpecial();
+                    } else {
+                        AddRandom(1);
+                    }
+                    if (result.vals.length > 0) {
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        function generateSlime(superior, listAttb, listSkill, listFeat, listAbility, listBodySlot, slotCount, hasHand, hasBody) {
+            let thing;
+            for (let k = 0; k < 20; k++) {
+                thing = generate(superior, listAttb, listSkill, listFeat, listAbility, listBodySlot);
+                if (EClass.rnd(10) < slotCount) {
+                    break;
+                }
+                if (thing.bodyId) {
+                    if (!hasHand && EClass.rnd(2) === 0) {
+                        const index = thing.vals.indexOf(thing.bodyId);
+                        if (index !== -1) thing.vals[index] = '手';
+                        thing.bodyId = '手';
+                    } else if (!hasBody && EClass.rnd(2) === 0) {
+                        const index = thing.vals.indexOf(thing.bodyId);
+                        if (index !== -1) thing.vals[index] = '胴';
+                        thing.bodyId = '胴';
+                    }
+                    break;
+                }
+            }
+            return thing;
+        }
+
+        function addItem(type, id = '', cost = 10, slot2 = false) {
+            const list = document.getElementById(`${type}-list`);
+            const div = document.createElement('div');
+            const typeJP = type === 'feat' ? 'フィート' : 'アビリティ';
+            div.className = 'dynamic-item';
+            div.innerHTML = `ID: <input type="text" class="${type}-id" value="${id || typeJP + (list.children.length + 1)}" style="width:80px">コスト: <input type="number" class="${type}-cost" value="${cost}" style="width:60px"><label style="font-weight:normal; margin-left:10px"><input type="checkbox" class="${type}-slot2" ${slot2 ? 'checked' : ''}> 2スロット</label><button class="btn-del" onclick="this.parentElement.remove()">削除</button>`;
+            list.appendChild(div);
+        }
+
+        document.querySelectorAll('.body-slider').forEach(s => {
+            s.addEventListener('input', e => { document.getElementById(`val-${e.target.dataset.id}`).textContent = e.target.value; });
+        });
+
+        document.getElementById('slimeSlotCount').addEventListener('input', e => {
+            document.getElementById('val-slimeSlotCount').textContent = e.target.value;
+        });
+
+        document.getElementById('predationMode').addEventListener('change', e => {
+            document.getElementById('slimeOptions').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        function getInputs() {
+            const superior = document.getElementById('superior').checked;
+            const listAttb = Array.from(document.querySelectorAll('.attb-id')).map((el, i) => ({ id: el.value, ValueWithoutLink: parseInt(document.querySelectorAll('.attb-val')[i].value) }));
+            const listSkill = Array.from(document.querySelectorAll('.skill-id')).map((el, i) => ({ id: el.value, ValueWithoutLink: parseInt(document.querySelectorAll('.skill-val')[i].value) }));
+            const listFeat = Array.from(document.querySelectorAll('.dynamic-item')).filter(i => i.querySelector('.feat-id')).map(el => ({ id: el.querySelector('.feat-id').value, source: { geneSlot: el.querySelector('.feat-slot2').checked ? 2 : 1, cost: [parseInt(el.querySelector('.feat-cost').value)] } }));
+            const listAbility = Array.from(document.querySelectorAll('.dynamic-item')).filter(i => i.querySelector('.ability-id')).map(el => ({ act: { source: { category: "ability", geneSlot: el.querySelector('.ability-slot2').checked ? 2 : 1, id: el.querySelector('.ability-id').value, cost: [parseInt(el.querySelector('.ability-cost').value)] } }, chance: 50, pt: false }));
+            const listBodySlot = [];
+            document.querySelectorAll('.body-slider').forEach(s => {
+                const count = parseInt(s.value);
+                for (let i = 0; i < count; i++) { listBodySlot.push({ elementId: s.dataset.id }); }
+            });
+
+            const predationMode = document.getElementById('predationMode').checked;
+            if (predationMode) {
+                const slotCount = parseInt(document.getElementById('slimeSlotCount').value);
+                const hasHand = document.getElementById('hasHand').checked;
+                const hasBody = document.getElementById('hasBody').checked;
+                return { fn: generateSlime, args: [superior, listAttb, listSkill, listFeat, listAbility, listBodySlot, slotCount, hasHand, hasBody] };
+            } else {
+                return { fn: generate, args: [superior, listAttb, listSkill, listFeat, listAbility, listBodySlot] };
+            }
+        }
+
+        document.getElementById('runOnceBtn').addEventListener('click', () => {
+            try { 
+                const { fn, args } = getInputs();
+                const result = fn(...args); 
+                displaySingleResult(result); 
+            } catch (e) { alert("エラー: " + e.message); console.error(e); }
+        });
+
+        document.getElementById('runMultiBtn').addEventListener('click', () => {
+            try {
+                const { fn, args } = getInputs();
+                const count = parseInt(document.getElementById('simCount').value);
+                const targetIdStr = document.getElementById('targetIds').value;
+                const targets = targetIdStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                
+                const stats = {};
+                let targetMatchCount = 0;
+                
+                for (let i = 0; i < count; i++) {
+                    const result = fn(...args);
+                    const currentIds = new Set();
+                    for (let j = 0; j < result.vals.length; j += 2) {
+                        const id = result.vals[j];
+                        stats[id] = (stats[id] || 0) + 1;
+                        currentIds.add(String(id));
+                    }
+                    
+                    if (targets.length > 0) {
+                        const allMatch = targets.every(t => currentIds.has(t));
+                        if (allMatch) targetMatchCount++;
+                    }
+                }
+                displayMultiResult(stats, count, targets, targetMatchCount);
+            } catch (e) { alert("エラー: " + e.message); console.error(e); }
+        });
+
+        function displaySingleResult(result) {
+            const resDiv = document.getElementById('result');
+            resDiv.style.display = 'block';
+            document.getElementById('res-header').textContent = `実行結果 (コスト: ${result.cost})`;
+            const content = document.getElementById('res-content');
+            content.innerHTML = '';
+            for (let i = 0; i < result.vals.length; i += 2) {
+                const line = document.createElement('div');
+                line.className = 'result-line';
+                line.textContent = `${result.vals[i]}: ${result.vals[i+1]}`;
+                content.appendChild(line);
+            }
+            resDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayMultiResult(stats, total, targets, matchCount) {
+            const resDiv = document.getElementById('result');
+            resDiv.style.display = 'block';
+            document.getElementById('res-header').textContent = `シミュレーション結果 (${total} 回試行)`;
+            const content = document.getElementById('res-content');
+            content.innerHTML = '';
+            
+            if (targets.length > 0) {
+                const percent = ((matchCount / total) * 100).toFixed(4);
+                const targetDiv = document.createElement('div');
+                targetDiv.className = 'target-result';
+                targetDiv.innerHTML = `欲しい組み合わせ [${targets.join(', ')}]:<br>${matchCount} / ${total} 回 (${percent}%)`;
+                content.appendChild(targetDiv);
+            }
+
+            const sortedEntries = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+            for (const [id, count] of sortedEntries) {
+                const percent = ((count / total) * 100).toFixed(1);
+                const line = document.createElement('div');
+                line.className = 'result-line';
+                line.innerHTML = `<span style="width:120px">${id}</span><div class="freq-bar"><div class="freq-fill" style="width: ${percent}%"></div><span class="freq-text">${count} (${percent}%)</span></div>`;
+                content.appendChild(line);
+            }
+            resDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        addItem('feat', '習得上手', 5);
+        addItem('ability', 'メテオ', 10);
+    </script>
+</body>
+</html>
