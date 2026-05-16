@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elin ベッド効率計算機</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; line-height: 1.4; color: #333; background-color: #f0f2f5; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; font-size: 1.5em; }
+        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 6px; }
+        .form-row { display: flex; align-items: center; margin-bottom: 15px; gap: 10px; }
+        .form-row label { flex: 0 0 120px; font-weight: bold; }
+        select, input[type="range"] { flex-grow: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+        .value-display { min-width: 30px; text-align: right; font-weight: bold; }
+        #result { margin-top: 25px; padding: 20px; border: 2px solid #007bff; background: #f8fbff; border-radius: 6px; }
+        .result-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px dashed #ddd; }
+        .result-label { font-weight: bold; color: #555; }
+        .result-value { font-size: 1.5em; font-weight: bold; color: #007bff; }
+        .result-value.large { font-size: 2em; color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Elin ベッド効率計算機</h1>
+
+        <div class="section">
+            <div class="form-row">
+                <label for="bedLv">ベッド種類</label>
+                <select id="bedLv">
+                    <option value="60">王様ベッド (Lv60)</option>
+                    <option value="40">王子様ベッド (Lv40)</option>
+                    <option value="32">ハンモック (Lv32)</option>
+                    <option value="30">お布団 (Lv30)</option>
+                    <option value="17">二段ベッド (Lv17)</option>
+                    <option value="6">寝袋 (Lv6)</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="materialQuality">素材品質</label>
+                <select id="materialQuality">
+                    <option value="48">エーテル/ダイヤ (48)</option>
+                    <option value="46">宵晒/ルビナス (46)</option>
+                    <option value="44">竜鱗 (44)</option>
+                    <option value="34">金 (34)</option>
+                    <option value="30">クロム (30)</option>
+                    <option value="28">カシミア (28)</option>
+                    <option value="14">鉄 (14)</option>
+                    <option value="7">銅 (7)</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="bedQualityLv">ベッド品質Lv</label>
+                <input type="range" id="bedQualityLv" min="-10" max="20" value="0">
+                <span class="value-display" id="bedQualityLvVal">0</span>
+            </div>
+
+            <div class="form-row">
+                <label for="bedResilience">ベッド回復力</label>
+                <input type="range" id="bedResilience" min="0" max="15" value="0">
+                <span class="value-display" id="bedResilienceVal">0</span>
+            </div>
+        </div>
+
+        <div id="result">
+            <div class="result-item">
+                <span class="result-label">ベッド品質:</span>
+                <span class="result-value" id="bedQualityResult">0.0</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">ベッド効率:</span>
+                <span class="result-value large" id="bedEfficiencyResult">0.0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bedLvSelect = document.getElementById('bedLv');
+        const materialQualitySelect = document.getElementById('materialQuality');
+        const bedQualityLvSlider = document.getElementById('bedQualityLv');
+        const bedResilienceSlider = document.getElementById('bedResilience');
+
+        const bedQualityLvVal = document.getElementById('bedQualityLvVal');
+        const bedResilienceVal = document.getElementById('bedResilienceVal');
+
+        const bedQualityResult = document.getElementById('bedQualityResult');
+        const bedEfficiencyResult = document.getElementById('bedEfficiencyResult');
+
+        function calculate() {
+            const bedLv = parseInt(bedLvSelect.value);
+            const materialQuality = parseInt(materialQualitySelect.value);
+            const bedQualityLv = parseInt(bedQualityLvSlider.value);
+            const bedResilience = parseInt(bedResilienceSlider.value);
+
+            bedQualityLvVal.textContent = bedQualityLv;
+            bedResilienceVal.textContent = bedResilience;
+
+            // ベッド品質＝(5 + ベッドLv + 素材品質) * (100 + ベッド品質Lv * 10)/100
+            const bedQuality = (5 + bedLv + materialQuality) * (100 + bedQualityLv * 10) / 100;
+
+            // ベッド効率＝80 + ベッド品質 + ベッド回復力
+            const bedEfficiency = 80 + bedQuality + bedResilience;
+
+            bedQualityResult.textContent = bedQuality.toFixed(1);
+            bedEfficiencyResult.textContent = bedEfficiency.toFixed(1);
+        }
+
+        [bedLvSelect, materialQualitySelect, bedQualityLvSlider, bedResilienceSlider].forEach(el => {
+            el.addEventListener('input', calculate);
+        });
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
