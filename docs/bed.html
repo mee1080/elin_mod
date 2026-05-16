@@ -66,13 +66,15 @@
 
         <div id="result">
             <div class="result-item">
-                <span class="result-label">ベッド品質:</span>
-                <span class="result-value" id="bedQualityResult">0.0</span>
-            </div>
-            <div class="result-item">
                 <span class="result-label">ベッド効率:</span>
                 <span class="result-value large" id="bedEfficiencyResult">0.0</span>
             </div>
+        </div>
+
+        <div class="section" style="font-size: 0.9em; color: #666; margin-top: 20px;">
+            <p><strong>計算式:</strong></p>
+            <p>ベッド品質 ＝ (5 + ベッド種類Lv + 素材品質) × (100 + ベッド品質Lv × 10) ÷ 100</p>
+            <p>ベッド効率 ＝ 80 + ベッド品質 + ベッド回復力 × 10</p>
         </div>
     </div>
 
@@ -85,7 +87,6 @@
         const bedQualityLvVal = document.getElementById('bedQualityLvVal');
         const bedResilienceVal = document.getElementById('bedResilienceVal');
 
-        const bedQualityResult = document.getElementById('bedQualityResult');
         const bedEfficiencyResult = document.getElementById('bedEfficiencyResult');
 
         function calculate() {
@@ -100,10 +101,9 @@
             // ベッド品質＝(5 + ベッドLv + 素材品質) * (100 + ベッド品質Lv * 10)/100
             const bedQuality = (5 + bedLv + materialQuality) * (100 + bedQualityLv * 10) / 100;
 
-            // ベッド効率＝80 + ベッド品質 + ベッド回復力
-            const bedEfficiency = 80 + bedQuality + bedResilience;
+            // ベッド効率＝80 + ベッド品質 + ベッド回復力 * 10
+            const bedEfficiency = 80 + bedQuality + bedResilience * 10;
 
-            bedQualityResult.textContent = bedQuality.toFixed(1);
             bedEfficiencyResult.textContent = bedEfficiency.toFixed(1);
         }
 
